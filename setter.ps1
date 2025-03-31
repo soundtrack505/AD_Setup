@@ -85,7 +85,7 @@ function New-SPNUser {
         [string]$SPN = "HTTP/myserver.mydomain.local"
     )
 
-    $passwordPlain = "peaceandlove"
+    $passwordPlain = "AD_Secret_Password2025!@#"
     $password = ConvertTo-SecureString $passwordPlain -AsPlainText -Force
 
     Try {
