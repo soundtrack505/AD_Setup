@@ -1,3 +1,38 @@
+function Sysmon_Install {
+    # Define URLs and paths
+    $sysmonUrl = "https://download.sysinternals.com/files/Sysmon.zip"
+    $configUrl = "https://raw.githubusercontent.com/olafhartong/sysmon-modular/refs/heads/master/sysmonconfig.xml"
+    $tempPath = "$env:TEMP\SysmonInstall"
+    $sysmonZip = "$tempPath\Sysmon.zip"
+    $configPath = "$tempPath\sysmonconfig.xml"
+    $sysmonExePath = "$tempPath\Sysmon64.exe"
+
+    # Create temp directory
+    if (-not (Test-Path $tempPath)) {
+        New-Item -Path $tempPath -ItemType Directory | Out-Null
+    }
+
+    # Download Sysmon and config
+    Invoke-WebRequest -Uri $sysmonUrl -OutFile $sysmonZip
+    Invoke-WebRequest -Uri $configUrl -OutFile $configPath
+
+    # Extract Sysmon
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($sysmonZip, $tempPath)
+
+    # Check for Sysmon64.exe (for 64-bit systems)
+    if (-Not (Test-Path $sysmonExePath)) {
+        Write-Host "Sysmon64.exe not found. Please check the Sysmon archive." -ForegroundColor Red
+        exit 1
+    }
+
+    # Install Sysmon with config
+    Start-Process -FilePath $sysmonExePath -ArgumentList "-accepteula -i $configPath" -Wait -NoNewWindow
+
+    # Confirm installation
+    Write-Host "Sysmon installation completed with config from Olaf Hartong's repository." -ForegroundColor Green
+}
+
 function Set_Audit_Policy {
     # ==============================
     # Enable Audit Policies
@@ -189,6 +224,9 @@ function main {
 
     # Setting a SPN user
     New-SPNUser
+
+    # Installing Sysmon
+    Sysmon_Install
 }
 
 
